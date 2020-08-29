@@ -1,0 +1,9 @@
+{
+	"type": "totemhunt:totemhunt",
+	"map": "totemhunt:lost_cavern",
+	"totems": 1,
+	"players": {
+		"min": 2,
+		"max": 32
+	}
+}

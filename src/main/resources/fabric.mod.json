@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "totemhunt",
+	"version": "${version}",
+	"name": "Totem Hunt",
+	"description": "A player avoidance minigame for Minecraft.",
+	"authors": [
+		"haykam821"
+	],
+	"contact": {
+		"homepage": "https://github.com/haykam821/Totem-Hunt#readme",
+		"issues": "https://github.com/haykam821/Totem-Hunt/issues"
+	},
+	"entrypoints": {
+		"main": [
+			"io.github.haykam821.totemhunt.Main"
+		]
+	},
+	"license": "MIT",
+	"icon": "assets/totemhunt/icon.png",
+	"depends": {
+		"fabricloader": ">=0.4.0"
+	}
+}
