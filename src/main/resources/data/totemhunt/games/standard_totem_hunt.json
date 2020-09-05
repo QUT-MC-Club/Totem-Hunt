@@ -4,6 +4,7 @@
 	"totems": 1,
 	"players": {
 		"min": 2,
-		"max": 32
+		"max": 32,
+		"threshold": 4
 	}
 }

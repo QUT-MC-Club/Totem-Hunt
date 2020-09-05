@@ -11,6 +11,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
+import xyz.nucleoid.plasmid.game.GameWaitingLobby;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.config.PlayerConfig;
@@ -43,7 +44,7 @@ public class TotemHuntWaitingPhase {
 			return context.openWorld(worldConfig).thenApply(gameWorld -> {
 				TotemHuntWaitingPhase phase = new TotemHuntWaitingPhase(gameWorld, map, context.getConfig());
 
-				gameWorld.openGame(game -> {
+				return GameWaitingLobby.open(gameWorld, context.getConfig().getPlayerConfig(), game -> {
 					TotemHuntActivePhase.setRules(game);
 
 					// Listeners
@@ -52,8 +53,6 @@ public class TotemHuntWaitingPhase {
 					game.on(OfferPlayerListener.EVENT, phase::offerPlayer);
 					game.on(RequestStartListener.EVENT, phase::requestStart);
 				});
-
-				return gameWorld;
 			});
 		});
 	}
