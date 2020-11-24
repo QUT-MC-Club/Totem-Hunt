@@ -1,11 +1,14 @@
 package io.github.haykam821.totemhunt.game.map;
 
-import java.util.concurrent.CompletableFuture;
-
 import io.github.haykam821.totemhunt.game.TotemHuntConfig;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
-import xyz.nucleoid.plasmid.game.map.template.MapTemplateSerializer;
+import xyz.nucleoid.plasmid.game.GameOpenException;
+import xyz.nucleoid.plasmid.map.template.MapTemplate;
+import xyz.nucleoid.plasmid.map.template.MapTemplateSerializer;
 import xyz.nucleoid.plasmid.util.BlockBounds;
+
+import java.io.IOException;
 
 public class TotemHuntMapBuilder {
 	private final TotemHuntConfig config;
@@ -14,14 +17,18 @@ public class TotemHuntMapBuilder {
 		this.config = config;
 	}
 
-	public CompletableFuture<TotemHuntMap> create() {
-		return MapTemplateSerializer.INSTANCE.load(this.config.getMap()).thenApply(template -> {
-			BlockBounds spawn = template.getFirstRegion("spawn");
+	public TotemHuntMap create() {
+		try {
+			MapTemplate template = MapTemplateSerializer.INSTANCE.loadFromResource(this.config.getMap());
+
+			BlockBounds spawn = template.getMetadata().getFirstRegionBounds("spawn");
 			if (spawn == null) {
-				return new TotemHuntMap(template, BlockBounds.of(new BlockPos(0, 0, 0)));
+				spawn = BlockBounds.of(new BlockPos(0, 0, 0));
 			}
 
 			return new TotemHuntMap(template, spawn);
-		});
+		} catch (IOException e) {
+			throw new GameOpenException(new LiteralText("Failed to load template"), e);
+		}
 	}
 }

@@ -1,11 +1,5 @@
 package io.github.haykam821.totemhunt.game.phase;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import io.github.haykam821.totemhunt.game.PlayerEntry;
 import io.github.haykam821.totemhunt.game.TotemHuntConfig;
 import io.github.haykam821.totemhunt.game.map.TotemHuntMap;
@@ -23,8 +17,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.plasmid.game.Game;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameLogic;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.event.GameOpenListener;
 import xyz.nucleoid.plasmid.game.event.GameTickListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
@@ -33,24 +27,30 @@ import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class TotemHuntActivePhase {
 	private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
 
-	private final GameWorld gameWorld;
+	private final GameSpace gameSpace;
 	private final ServerWorld world;
 	private final TotemHuntMap map;
 	private final TotemHuntConfig config;
 	private final List<PlayerEntry> players = new ArrayList<>();
 	private int ticksElapsed = 0;
 
-	public TotemHuntActivePhase(GameWorld gameWorld, TotemHuntMap map, TotemHuntConfig config) {
-		this.gameWorld = gameWorld;
-		this.world = gameWorld.getWorld();
+	public TotemHuntActivePhase(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config) {
+		this.gameSpace = gameSpace;
+		this.world = gameSpace.getWorld();
 		this.map = map;
 		this.config = config;
 	}
 
-	public static void setRules(Game game) {
+	public static void setRules(GameLogic game) {
 		game.setRule(GameRule.BLOCK_DROPS, RuleResult.DENY);
 		game.setRule(GameRule.CRAFTING, RuleResult.DENY);
 		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
@@ -59,10 +59,10 @@ public class TotemHuntActivePhase {
 		game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
 	}
 
-	public static void open(GameWorld gameWorld, TotemHuntMap map, TotemHuntConfig config) {
-		TotemHuntActivePhase phase = new TotemHuntActivePhase(gameWorld, map, config);
+	public static void open(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config) {
+		gameSpace.openGame(game -> {
+			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, map, config);
 
-		gameWorld.openGame(game -> {
 			TotemHuntActivePhase.setRules(game);
 
 			// Listeners
@@ -84,7 +84,7 @@ public class TotemHuntActivePhase {
 
 	private List<ServerPlayerEntity> getShuffledPlayers() {
 		List<ServerPlayerEntity> players = new ArrayList<>();
-		for (ServerPlayerEntity player : this.gameWorld.getPlayerSet()) {
+		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
 			players.add(player);
 		}
 
@@ -117,7 +117,7 @@ public class TotemHuntActivePhase {
 				breakdown.append("\n- ").append(role.getName()).append(": " + count + " player" + (count == 1 ? "" : "s"));
 			}
 		}
-		this.gameWorld.getPlayerSet().sendMessage(breakdown.formatted(Formatting.GOLD));
+		this.gameSpace.getPlayers().sendMessage(breakdown.formatted(Formatting.GOLD));
 	}
 
 	private void tick() {
@@ -130,12 +130,16 @@ public class TotemHuntActivePhase {
 
 		String time = TotemHuntActivePhase.FORMAT.format(this.ticksElapsed / (double) 20);
 
-		return hunterName.shallowCopy().append(" found the totem in the hands of " + holderName + " after " + time + " seconds!").formatted(Formatting.RED);
+		return hunterName.shallowCopy()
+				.append(" found the totem in the hands of ")
+				.append(holderName)
+				.append(" after " + time + " seconds!")
+				.formatted(Formatting.RED);
 	}
 
 	public void endGame(ServerPlayerEntity hunter, ServerPlayerEntity holder) {
-		this.gameWorld.getPlayerSet().sendMessage(this.getWinMessage(hunter, holder));
-		this.gameWorld.close();
+		this.gameSpace.getPlayers().sendMessage(this.getWinMessage(hunter, holder));
+		this.gameSpace.close();
 	}
 
 	private void setSpectator(PlayerEntity player) {
@@ -157,19 +161,19 @@ public class TotemHuntActivePhase {
 		}
 	}
 	
-	private boolean onPlayerDamage(ServerPlayerEntity player, DamageSource source, float damage) {
-		if (!(source.getAttacker() instanceof ServerPlayerEntity)) return false;
+	private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float damage) {
+		if (!(source.getAttacker() instanceof ServerPlayerEntity)) return ActionResult.PASS;
 
 		PlayerEntry target = this.getEntryFromPlayer(player);
-		if (target == null) return false;
+		if (target == null) return ActionResult.PASS;
 
 		PlayerEntry attacker = this.getEntryFromPlayer((ServerPlayerEntity) source.getAttacker());
-		if (attacker == null) return false;
+		if (attacker == null) return ActionResult.PASS;
 	
 		if (attacker.getRole().canTransferTo(target.getRole())) {
 			attacker.getRole().onGiveTotem(attacker, target);
 		}
-		return false;
+		return ActionResult.PASS;
 	}
 
 	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {

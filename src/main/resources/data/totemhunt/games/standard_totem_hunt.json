@@ -1,5 +1,6 @@
 {
 	"type": "totemhunt:totemhunt",
+	"name": "Totem Hunt",
 	"map": "totemhunt:lost_cavern",
 	"totems": 1,
 	"players": {
