@@ -84,7 +84,7 @@ public class TotemHuntWaitingPhase {
 	}
 
 	private void spawn(ServerPlayerEntity player) {
-		Vec3d center = this.map.getSpawn().getCenter();
+		Vec3d center = this.map.getWaitingSpawn().getCenter();
 		player.teleport(this.gameSpace.getWorld(), center.getX(), center.getY(), center.getZ(), 0, 0);
 	}
 }

@@ -108,7 +108,7 @@ public class TotemHuntActivePhase {
 			roleCounts.addTo(role, 1);
 
 			PlayerEntry entry = new PlayerEntry(this, player, role);
-			entry.spawn(world, this.map.getSpawn());
+			entry.spawn(world, this.map.getSpawns().get(index % this.map.getSpawns().size()));
 
 			this.players.add(entry);
 			index += 1;
@@ -186,7 +186,7 @@ public class TotemHuntActivePhase {
 	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		PlayerEntry entry = this.getEntryFromPlayer(player);
 		if (entry != null) {
-			entry.spawn(this.world, this.map.getSpawn());
+			entry.spawn(this.world, this.map.getWaitingSpawn());
 		}
 
 		return ActionResult.SUCCESS;
