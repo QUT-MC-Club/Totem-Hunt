@@ -1,10 +1,10 @@
 {
 	"type": "totemhunt:totemhunt",
-	"name": "Totem Hunt",
+	"translation": "game.totemhunt.lost_cavern_totem_hunt",
 	"map": "totemhunt:lost_cavern",
 	"totems": 1,
 	"players": {
-		"min": 2,
+		"min": 1,
 		"max": 32,
 		"threshold": 4
 	}
