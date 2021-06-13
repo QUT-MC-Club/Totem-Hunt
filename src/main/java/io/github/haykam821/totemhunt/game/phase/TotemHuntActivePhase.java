@@ -18,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.GameCloseReason;
 import xyz.nucleoid.plasmid.game.GameLogic;
 import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.event.GameOpenListener;
@@ -145,7 +146,7 @@ public class TotemHuntActivePhase {
 
 	public void endGame(ServerPlayerEntity hunter, ServerPlayerEntity holder) {
 		this.gameSpace.getPlayers().sendMessage(this.getWinMessage(hunter, holder));
-		this.gameSpace.close();
+		this.gameSpace.close(GameCloseReason.FINISHED);
 	}
 
 	private void setSpectator(PlayerEntity player) {
