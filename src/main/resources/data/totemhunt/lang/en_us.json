@@ -1,0 +1,5 @@
+{
+	"gameType.totemhunt.totemhunt": "Totem Hunt",
+	"text.totemhunt.bar.invulnerability": "Run from the Hunter",
+	"text.totemhunt.cannot_attack_invulnerable_player": "You cannot attack a Totem Holder during the invulnerability period."
+}

@@ -4,12 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.github.haykam821.totemhunt.game.PlayerEntry;
+import io.github.haykam821.totemhunt.game.phase.TotemHuntActivePhase;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
@@ -28,7 +30,14 @@ public class HunterRole extends Role {
 	}
 
 	@Override
-	public void onGiveTotem(PlayerEntry from, PlayerEntry to) {
+	public void onGiveTotem(TotemHuntActivePhase phase, PlayerEntry from, PlayerEntry to) {
+		if (phase.getTicksElapsed() > phase.getConfig().getInvulnerabilityTicks()) {
+			Text message = new TranslatableText("text.totemhunt.cannot_attack_invulnerable_player").formatted(Formatting.RED);
+			from.getPlayer().sendMessage(message, false);
+
+			return;
+		}
+
 		from.getPhase().endGame(from.getPlayer(), to.getPlayer());
 	}
 

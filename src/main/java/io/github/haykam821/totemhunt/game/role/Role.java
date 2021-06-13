@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.haykam821.totemhunt.game.PlayerEntry;
+import io.github.haykam821.totemhunt.game.phase.TotemHuntActivePhase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -14,7 +15,7 @@ public abstract class Role {
 
 	public abstract Text getName();
 
-	public void onGiveTotem(PlayerEntry from, PlayerEntry to) {
+	public void onGiveTotem(TotemHuntActivePhase phase, PlayerEntry from, PlayerEntry to) {
 		from.changeRole(Roles.PLAYER.getRole());
 		to.changeRole(Roles.HOLDER.getRole());
 	}

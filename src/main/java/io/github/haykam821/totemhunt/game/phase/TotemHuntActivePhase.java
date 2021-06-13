@@ -1,6 +1,7 @@
 package io.github.haykam821.totemhunt.game.phase;
 
 import io.github.haykam821.totemhunt.game.PlayerEntry;
+import io.github.haykam821.totemhunt.game.TotemHuntBar;
 import io.github.haykam821.totemhunt.game.TotemHuntConfig;
 import io.github.haykam821.totemhunt.game.map.TotemHuntMap;
 import io.github.haykam821.totemhunt.game.role.Role;
@@ -26,6 +27,7 @@ import xyz.nucleoid.plasmid.game.event.PlayerDamageListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
+import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -41,13 +43,15 @@ public class TotemHuntActivePhase {
 	private final TotemHuntMap map;
 	private final TotemHuntConfig config;
 	private final List<PlayerEntry> players = new ArrayList<>();
+	private final TotemHuntBar timer;
 	private int ticksElapsed = 0;
 
-	public TotemHuntActivePhase(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config) {
+	public TotemHuntActivePhase(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config, GlobalWidgets widgets) {
 		this.gameSpace = gameSpace;
 		this.world = gameSpace.getWorld();
 		this.map = map;
 		this.config = config;
+		this.timer = new TotemHuntBar(this, widgets);
 	}
 
 	public static void setRules(GameLogic game) {
@@ -61,7 +65,8 @@ public class TotemHuntActivePhase {
 
 	public static void open(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config) {
 		gameSpace.openGame(game -> {
-			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, map, config);
+			GlobalWidgets widgets = new GlobalWidgets(game);
+			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, map, config, widgets);
 
 			TotemHuntActivePhase.setRules(game);
 
@@ -122,6 +127,7 @@ public class TotemHuntActivePhase {
 
 	private void tick() {
 		this.ticksElapsed += 1;
+		this.timer.tick();
 	}
 
 	private Text getWinMessage(ServerPlayerEntity hunter, ServerPlayerEntity holder) {
@@ -171,7 +177,7 @@ public class TotemHuntActivePhase {
 		if (attacker == null) return ActionResult.PASS;
 	
 		if (attacker.getRole().canTransferTo(target.getRole())) {
-			attacker.getRole().onGiveTotem(attacker, target);
+			attacker.getRole().onGiveTotem(this, attacker, target);
 		}
 		return ActionResult.PASS;
 	}
@@ -183,6 +189,18 @@ public class TotemHuntActivePhase {
 		}
 
 		return ActionResult.SUCCESS;
+	}
+
+	public GameSpace getGameSpace() {
+		return this.gameSpace;
+	}
+
+	public TotemHuntConfig getConfig() {
+		return this.config;
+	}
+
+	public int getTicksElapsed() {
+		return this.ticksElapsed;
 	}
 
 	static {
