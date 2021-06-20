@@ -31,7 +31,7 @@ public class HunterRole extends Role {
 
 	@Override
 	public void onGiveTotem(TotemHuntActivePhase phase, PlayerEntry from, PlayerEntry to) {
-		if (phase.getTicksElapsed() > phase.getConfig().getInvulnerabilityTicks()) {
+		if (phase.isInvulnerabilityPeriod()) {
 			Text message = new TranslatableText("text.totemhunt.cannot_attack_invulnerable_player").formatted(Formatting.RED);
 			from.getPlayer().sendMessage(message, false);
 

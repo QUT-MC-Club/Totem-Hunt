@@ -204,6 +204,10 @@ public class TotemHuntActivePhase {
 		return this.ticksElapsed;
 	}
 
+	public boolean isInvulnerabilityPeriod() {
+		return this.ticksElapsed <= this.config.getInvulnerabilityTicks();
+	}
+
 	static {
 		FORMAT.setRoundingMode(RoundingMode.DOWN);
 	}

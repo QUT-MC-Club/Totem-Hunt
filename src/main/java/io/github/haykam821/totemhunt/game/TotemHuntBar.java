@@ -32,11 +32,11 @@ public class TotemHuntBar {
 		int ticksElapsed = this.phase.getTicksElapsed();
 		int invulnerabilityTicks = this.phase.getConfig().getInvulnerabilityTicks();
 
-		if (ticksElapsed > invulnerabilityTicks) {
+		if (this.phase.isInvulnerabilityPeriod()) {
+			this.widget.setProgress((invulnerabilityTicks - ticksElapsed) / (float) invulnerabilityTicks);
+		} else {
 			this.widget.close();
 			this.closed = true;
-		} else {
-			this.widget.setProgress((invulnerabilityTicks - ticksElapsed) / (float) invulnerabilityTicks);
 		}
 	}
 
