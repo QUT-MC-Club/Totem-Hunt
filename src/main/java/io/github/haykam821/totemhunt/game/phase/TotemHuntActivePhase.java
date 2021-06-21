@@ -169,18 +169,18 @@ public class TotemHuntActivePhase {
 	}
 	
 	private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float damage) {
-		if (!(source.getAttacker() instanceof ServerPlayerEntity)) return ActionResult.PASS;
+		if (!(source.getAttacker() instanceof ServerPlayerEntity)) return ActionResult.FAIL;
 
 		PlayerEntry target = this.getEntryFromPlayer(player);
-		if (target == null) return ActionResult.PASS;
+		if (target == null) return ActionResult.FAIL;
 
 		PlayerEntry attacker = this.getEntryFromPlayer((ServerPlayerEntity) source.getAttacker());
-		if (attacker == null) return ActionResult.PASS;
+		if (attacker == null) return ActionResult.FAIL;
 	
 		if (attacker.getRole().canTransferTo(target.getRole())) {
 			attacker.getRole().onGiveTotem(this, attacker, target);
 		}
-		return ActionResult.PASS;
+		return ActionResult.FAIL;
 	}
 
 	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
@@ -189,7 +189,7 @@ public class TotemHuntActivePhase {
 			entry.spawn(this.world, this.map.getWaitingSpawn());
 		}
 
-		return ActionResult.SUCCESS;
+		return ActionResult.FAIL;
 	}
 
 	public GameSpace getGameSpace() {

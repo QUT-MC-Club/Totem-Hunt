@@ -17,6 +17,7 @@ import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.config.PlayerConfig;
 import xyz.nucleoid.plasmid.game.event.OfferPlayerListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
+import xyz.nucleoid.plasmid.game.event.PlayerDamageListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.event.RequestStartListener;
 import xyz.nucleoid.plasmid.game.player.JoinResult;
@@ -49,6 +50,7 @@ public class TotemHuntWaitingPhase {
 
 			// Listeners
 			game.on(PlayerAddListener.EVENT, phase::addPlayer);
+			game.on(PlayerDamageListener.EVENT, phase::onPlayerDamage);
 			game.on(PlayerDeathListener.EVENT, phase::onPlayerDeath);
 			game.on(OfferPlayerListener.EVENT, phase::offerPlayer);
 			game.on(RequestStartListener.EVENT, phase::requestStart);
@@ -77,10 +79,14 @@ public class TotemHuntWaitingPhase {
 		this.spawn(player);
 	}
 
+	public ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
+		return ActionResult.FAIL;
+	}
+
 	public ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		// Respawn player at the start
 		this.spawn(player);
-		return ActionResult.SUCCESS;
+		return ActionResult.FAIL;
 	}
 
 	private void spawn(ServerPlayerEntity player) {
