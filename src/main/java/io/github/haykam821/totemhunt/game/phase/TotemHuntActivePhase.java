@@ -27,7 +27,6 @@ import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDamageListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
-import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 
 import java.math.RoundingMode;
@@ -56,12 +55,12 @@ public class TotemHuntActivePhase {
 	}
 
 	public static void setRules(GameLogic game) {
-		game.setRule(GameRule.BLOCK_DROPS, RuleResult.DENY);
-		game.setRule(GameRule.CRAFTING, RuleResult.DENY);
-		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
-		game.setRule(GameRule.HUNGER, RuleResult.DENY);
-		game.setRule(GameRule.PORTALS, RuleResult.DENY);
-		game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
+		game.deny(GameRule.BLOCK_DROPS);
+		game.deny(GameRule.CRAFTING);
+		game.deny(GameRule.FALL_DAMAGE);
+		game.deny(GameRule.HUNGER);
+		game.deny(GameRule.PORTALS);
+		game.deny(GameRule.THROW_ITEMS);
 	}
 
 	public static void open(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config) {
@@ -72,11 +71,11 @@ public class TotemHuntActivePhase {
 			TotemHuntActivePhase.setRules(game);
 
 			// Listeners
-			game.on(GameOpenListener.EVENT, phase::open);
-			game.on(GameTickListener.EVENT, phase::tick);
-			game.on(PlayerAddListener.EVENT, phase::addPlayer);
-			game.on(PlayerDamageListener.EVENT, phase::onPlayerDamage);
-			game.on(PlayerDeathListener.EVENT, phase::onPlayerDeath);
+			game.listen(GameOpenListener.EVENT, phase::open);
+			game.listen(GameTickListener.EVENT, phase::tick);
+			game.listen(PlayerAddListener.EVENT, phase::addPlayer);
+			game.listen(PlayerDamageListener.EVENT, phase::onPlayerDamage);
+			game.listen(PlayerDeathListener.EVENT, phase::onPlayerDeath);
 		});
 	}
 

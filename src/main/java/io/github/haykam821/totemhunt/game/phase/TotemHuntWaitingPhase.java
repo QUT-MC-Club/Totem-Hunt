@@ -42,18 +42,18 @@ public class TotemHuntWaitingPhase {
 			.setDefaultGameMode(GameMode.ADVENTURE);
 
 		return context.createOpenProcedure(worldConfig, game -> {
-			TotemHuntWaitingPhase phase = new TotemHuntWaitingPhase(game.getSpace(), map, context.getConfig());
+			TotemHuntWaitingPhase phase = new TotemHuntWaitingPhase(game.getGameSpace(), map, context.getConfig());
 
 			GameWaitingLobby.applyTo(game, context.getConfig().getPlayerConfig());
 
 			TotemHuntActivePhase.setRules(game);
 
 			// Listeners
-			game.on(PlayerAddListener.EVENT, phase::addPlayer);
-			game.on(PlayerDamageListener.EVENT, phase::onPlayerDamage);
-			game.on(PlayerDeathListener.EVENT, phase::onPlayerDeath);
-			game.on(OfferPlayerListener.EVENT, phase::offerPlayer);
-			game.on(RequestStartListener.EVENT, phase::requestStart);
+			game.listen(PlayerAddListener.EVENT, phase::addPlayer);
+			game.listen(PlayerDamageListener.EVENT, phase::onPlayerDamage);
+			game.listen(PlayerDeathListener.EVENT, phase::onPlayerDeath);
+			game.listen(OfferPlayerListener.EVENT, phase::offerPlayer);
+			game.listen(RequestStartListener.EVENT, phase::requestStart);
 		});
 	}
 
