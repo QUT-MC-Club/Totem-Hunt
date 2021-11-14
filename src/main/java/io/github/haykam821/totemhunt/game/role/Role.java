@@ -11,7 +11,7 @@ import net.minecraft.text.Text;
 import xyz.nucleoid.plasmid.registry.TinyRegistry;
 
 public abstract class Role {
-	public static final TinyRegistry<Role> REGISTRY = TinyRegistry.newStable();
+	public static final TinyRegistry<Role> REGISTRY = TinyRegistry.create();
 
 	public abstract Text getName();
 
@@ -25,7 +25,7 @@ public abstract class Role {
 	}
 
 	public void unapply(PlayerEntry entry) {
-		entry.getPlayer().inventory.clear();
+		entry.getPlayer().getInventory().clear();
 	}
 
 	public void apply(PlayerEntry entry) {
@@ -34,21 +34,20 @@ public abstract class Role {
 		int slot = 0;
 		List<ItemStack> hotbar = this.getHotbar();
 		for (ItemStack stack : hotbar) {
-			player.inventory.setStack(slot, stack);
+			player.getInventory().setStack(slot, stack);
 			slot += 1;
 		}
 
 		slot = 3;
 		List<ItemStack> armor = this.getArmor();
 		for (ItemStack stack : armor) {
-			player.inventory.armor.set(slot, stack);
+			player.getInventory().armor.set(slot, stack);
 			slot -= 1;
 		}
 
 		// Update inventory
 		player.currentScreenHandler.sendContentUpdates();
-		player.playerScreenHandler.onContentChanged(player.inventory);
-		player.updateCursorStack();
+		player.playerScreenHandler.onContentChanged(player.getInventory());
 	}
 
 	public List<ItemStack> getHotbar() {

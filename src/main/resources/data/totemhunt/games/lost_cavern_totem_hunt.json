@@ -1,6 +1,5 @@
 {
 	"type": "totemhunt:totemhunt",
-	"translation": "game.totemhunt.lost_cavern_totem_hunt",
 	"map": "totemhunt:lost_cavern",
 	"totems": 1,
 	"players": {

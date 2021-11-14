@@ -6,8 +6,8 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-import xyz.nucleoid.plasmid.widget.BossBarWidget;
-import xyz.nucleoid.plasmid.widget.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.common.widget.BossBarWidget;
 
 public class TotemHuntBar {
 	private static final BossBar.Style STYLE = BossBar.Style.PROGRESS;
@@ -21,9 +21,7 @@ public class TotemHuntBar {
 
 	public TotemHuntBar(TotemHuntActivePhase phase, GlobalWidgets widgets) {
 		this.phase = phase;
-
 		this.widget = widgets.addBossBar(this.getBarTitle(TITLE, FORMATTING), COLOR, STYLE);
-		this.phase.getGameSpace().addResource(this.widget);
 	}
 
 	public void tick() {

@@ -1,5 +1,11 @@
 package io.github.haykam821.totemhunt.game.phase;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import io.github.haykam821.totemhunt.game.PlayerEntry;
 import io.github.haykam821.totemhunt.game.TotemHuntBar;
 import io.github.haykam821.totemhunt.game.TotemHuntConfig;
@@ -9,7 +15,6 @@ import io.github.haykam821.totemhunt.game.role.Roles;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
@@ -18,22 +23,17 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.GameActivity;
 import xyz.nucleoid.plasmid.game.GameCloseReason;
-import xyz.nucleoid.plasmid.game.GameLogic;
 import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.game.event.GameOpenListener;
-import xyz.nucleoid.plasmid.game.event.GameTickListener;
-import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
-import xyz.nucleoid.plasmid.game.event.PlayerDamageListener;
-import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
-import xyz.nucleoid.plasmid.game.rule.GameRule;
-import xyz.nucleoid.plasmid.widget.GlobalWidgets;
-
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.game.player.PlayerOffer;
+import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
+import xyz.nucleoid.plasmid.game.rule.GameRuleType;
+import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
 public class TotemHuntActivePhase {
 	private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
@@ -46,36 +46,37 @@ public class TotemHuntActivePhase {
 	private final TotemHuntBar timer;
 	private int ticksElapsed = 0;
 
-	public TotemHuntActivePhase(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config, GlobalWidgets widgets) {
+	public TotemHuntActivePhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config, GlobalWidgets widgets) {
 		this.gameSpace = gameSpace;
-		this.world = gameSpace.getWorld();
+		this.world = world;
 		this.map = map;
 		this.config = config;
 		this.timer = new TotemHuntBar(this, widgets);
 	}
 
-	public static void setRules(GameLogic game) {
-		game.deny(GameRule.BLOCK_DROPS);
-		game.deny(GameRule.CRAFTING);
-		game.deny(GameRule.FALL_DAMAGE);
-		game.deny(GameRule.HUNGER);
-		game.deny(GameRule.PORTALS);
-		game.deny(GameRule.THROW_ITEMS);
+	public static void setRules(GameActivity activity) {
+		activity.deny(GameRuleType.BLOCK_DROPS);
+		activity.deny(GameRuleType.CRAFTING);
+		activity.deny(GameRuleType.FALL_DAMAGE);
+		activity.deny(GameRuleType.HUNGER);
+		activity.deny(GameRuleType.PORTALS);
+		activity.deny(GameRuleType.THROW_ITEMS);
 	}
 
-	public static void open(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config) {
-		gameSpace.openGame(game -> {
-			GlobalWidgets widgets = new GlobalWidgets(game);
-			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, map, config, widgets);
+	public static void open(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config) {
+		gameSpace.setActivity(activity -> {
+			GlobalWidgets widgets = GlobalWidgets.addTo(activity);
+			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, world, map, config, widgets);
 
-			TotemHuntActivePhase.setRules(game);
+			TotemHuntActivePhase.setRules(activity);
 
 			// Listeners
-			game.listen(GameOpenListener.EVENT, phase::open);
-			game.listen(GameTickListener.EVENT, phase::tick);
-			game.listen(PlayerAddListener.EVENT, phase::addPlayer);
-			game.listen(PlayerDamageListener.EVENT, phase::onPlayerDamage);
-			game.listen(PlayerDeathListener.EVENT, phase::onPlayerDeath);
+			activity.listen(GameActivityEvents.ENABLE, phase::enable);
+			activity.listen(GameActivityEvents.TICK, phase::tick);
+			activity.listen(GamePlayerEvents.OFFER, phase::offerPlayer);
+			activity.listen(GamePlayerEvents.REMOVE, phase::removePlayer);
+			activity.listen(PlayerDamageEvent.EVENT, phase::onPlayerDamage);
+			activity.listen(PlayerDeathEvent.EVENT, phase::onPlayerDeath);
 		});
 	}
 
@@ -97,7 +98,7 @@ public class TotemHuntActivePhase {
 		return players;
 	}
 
-	private void open() {
+	private void enable() {
 		Object2IntLinkedOpenHashMap<Role> roleCounts = new Object2IntLinkedOpenHashMap<>();
 		roleCounts.defaultReturnValue(0);
 
@@ -148,8 +149,8 @@ public class TotemHuntActivePhase {
 		this.gameSpace.close(GameCloseReason.FINISHED);
 	}
 
-	private void setSpectator(PlayerEntity player) {
-		player.setGameMode(GameMode.SPECTATOR);
+	private void setSpectator(ServerPlayerEntity player) {
+		player.changeGameMode(GameMode.SPECTATOR);
 	}
 
 	private PlayerEntry getEntryFromPlayer(ServerPlayerEntity player) {
@@ -161,9 +162,43 @@ public class TotemHuntActivePhase {
 		return null;
 	}
 
-	private void addPlayer(ServerPlayerEntity player) {
-		if (this.getEntryFromPlayer(player) == null) {
-			this.setSpectator(player);
+	private PlayerOfferResult offerPlayer(PlayerOffer offer) {
+		return offer.accept(this.world, this.map.getWaitingSpawn().center()).and(() -> {
+			this.setSpectator(offer.player());
+		});
+	}
+
+	private void removePlayer(ServerPlayerEntity player) {
+		PlayerEntry entry = this.getEntryFromPlayer(player);
+		if (entry != null) {
+			this.players.remove(entry);
+			this.reassignRequiredRoles();
+		}
+	}
+
+	private void reassignRequiredRoles() {
+		boolean needsHunter = true;
+		boolean needsHolder = true;
+		for (PlayerEntry entry : this.players) {
+			if (entry.getRole() == Roles.HUNTER.getRole()) {
+				needsHunter = false;
+			} else if (entry.getRole() == Roles.HOLDER.getRole()) {
+				needsHolder = false;
+			}
+
+			if (!needsHunter && !needsHolder) {
+				return;
+			}
+		}
+
+		for (PlayerEntry entry : this.players) {
+			if (needsHunter) {
+				needsHunter = false;
+				entry.changeRole(Roles.HUNTER.getRole());
+			} else if (needsHolder) {
+				needsHolder = false;
+				entry.changeRole(Roles.HUNTER.getRole());
+			}
 		}
 	}
 	

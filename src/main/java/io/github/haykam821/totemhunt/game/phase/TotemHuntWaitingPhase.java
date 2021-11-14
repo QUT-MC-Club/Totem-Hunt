@@ -5,78 +5,67 @@ import io.github.haykam821.totemhunt.game.map.TotemHuntMap;
 import io.github.haykam821.totemhunt.game.map.TotemHuntMapBuilder;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.fantasy.BubbleWorldConfig;
+import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
 import xyz.nucleoid.plasmid.game.GameOpenProcedure;
+import xyz.nucleoid.plasmid.game.GameResult;
 import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.game.GameWaitingLobby;
-import xyz.nucleoid.plasmid.game.StartResult;
-import xyz.nucleoid.plasmid.game.config.PlayerConfig;
-import xyz.nucleoid.plasmid.game.event.OfferPlayerListener;
-import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
-import xyz.nucleoid.plasmid.game.event.PlayerDamageListener;
-import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
-import xyz.nucleoid.plasmid.game.event.RequestStartListener;
-import xyz.nucleoid.plasmid.game.player.JoinResult;
+import xyz.nucleoid.plasmid.game.common.GameWaitingLobby;
+import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.game.player.PlayerOffer;
+import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
+import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
 public class TotemHuntWaitingPhase {
 	private final GameSpace gameSpace;
+	private final ServerWorld world;
 	private final TotemHuntMap map;
 	private final TotemHuntConfig config;
 
-	public TotemHuntWaitingPhase(GameSpace gameSpace, TotemHuntMap map, TotemHuntConfig config) {
+	public TotemHuntWaitingPhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config) {
 		this.gameSpace = gameSpace;
+		this.world = world;
 		this.map = map;
 		this.config = config;
 	}
 
 	public static GameOpenProcedure open(GameOpenContext<TotemHuntConfig> context) {
-		TotemHuntMapBuilder mapBuilder = new TotemHuntMapBuilder(context.getConfig());
-		TotemHuntMap map = mapBuilder.create();
+		TotemHuntMapBuilder mapBuilder = new TotemHuntMapBuilder(context.config());
+		TotemHuntMap map = mapBuilder.create(context.server());
 
-		BubbleWorldConfig worldConfig = new BubbleWorldConfig()
-			.setGenerator(map.createGenerator(context.getServer()))
-			.setDefaultGameMode(GameMode.ADVENTURE);
+		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
+			.setGenerator(map.createGenerator(context.server()));
 
-		return context.createOpenProcedure(worldConfig, game -> {
-			TotemHuntWaitingPhase phase = new TotemHuntWaitingPhase(game.getGameSpace(), map, context.getConfig());
+		return context.openWithWorld(worldConfig, (activity, world) -> {
+			TotemHuntWaitingPhase phase = new TotemHuntWaitingPhase(activity.getGameSpace(), world, map, context.config());
 
-			GameWaitingLobby.applyTo(game, context.getConfig().getPlayerConfig());
+			GameWaitingLobby.addTo(activity, context.config().getPlayerConfig());
 
-			TotemHuntActivePhase.setRules(game);
+			TotemHuntActivePhase.setRules(activity);
 
 			// Listeners
-			game.listen(PlayerAddListener.EVENT, phase::addPlayer);
-			game.listen(PlayerDamageListener.EVENT, phase::onPlayerDamage);
-			game.listen(PlayerDeathListener.EVENT, phase::onPlayerDeath);
-			game.listen(OfferPlayerListener.EVENT, phase::offerPlayer);
-			game.listen(RequestStartListener.EVENT, phase::requestStart);
+			activity.listen(GamePlayerEvents.OFFER, phase::offerPlayer);
+			activity.listen(PlayerDamageEvent.EVENT, phase::onPlayerDamage);
+			activity.listen(PlayerDeathEvent.EVENT, phase::onPlayerDeath);
+			activity.listen(GameActivityEvents.REQUEST_START, phase::requestStart);
 		});
 	}
 
-	private boolean isFull() {
-		return this.gameSpace.getPlayerCount() >= this.config.getPlayerConfig().getMaxPlayers();
+	public GameResult requestStart() {
+		TotemHuntActivePhase.open(this.gameSpace, this.world, this.map, this.config);
+		return GameResult.ok();
 	}
 
-	public JoinResult offerPlayer(ServerPlayerEntity player) {
-		return this.isFull() ? JoinResult.gameFull() : JoinResult.ok();
-	}
-
-	public StartResult requestStart() {
-		PlayerConfig playerConfig = this.config.getPlayerConfig();
-		if (this.gameSpace.getPlayerCount() < playerConfig.getMinPlayers()) {
-			return StartResult.NOT_ENOUGH_PLAYERS;
-		}
-
-		TotemHuntActivePhase.open(this.gameSpace, this.map, this.config);
-		return StartResult.OK;
-	}
-
-	public void addPlayer(ServerPlayerEntity player) {
-		this.spawn(player);
+	public PlayerOfferResult offerPlayer(PlayerOffer offer) {
+		return offer.accept(this.world, this.map.getWaitingSpawn().center()).and(() -> {
+			offer.player().changeGameMode(GameMode.ADVENTURE);
+		});
 	}
 
 	public ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
@@ -90,7 +79,7 @@ public class TotemHuntWaitingPhase {
 	}
 
 	private void spawn(ServerPlayerEntity player) {
-		Vec3d center = this.map.getWaitingSpawn().getCenter();
-		player.teleport(this.gameSpace.getWorld(), center.getX(), center.getY(), center.getZ(), 0, 0);
+		Vec3d center = this.map.getWaitingSpawn().center();
+		player.teleport(this.world, center.getX(), center.getY(), center.getZ(), 0, 0);
 	}
 }

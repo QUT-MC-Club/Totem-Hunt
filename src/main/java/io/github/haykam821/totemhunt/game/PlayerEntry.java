@@ -7,7 +7,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.plasmid.util.BlockBounds;
+import xyz.nucleoid.map_templates.BlockBounds;
 
 public class PlayerEntry {
 	private final TotemHuntActivePhase phase;
@@ -33,10 +33,10 @@ public class PlayerEntry {
 	}
 
 	public void spawn(ServerWorld world, BlockBounds spawn) {
-		this.player.setGameMode(GameMode.ADVENTURE);
+		this.player.changeGameMode(GameMode.ADVENTURE);
 		this.role.apply(this);
 
-		Vec3d center = spawn.getCenter();
+		Vec3d center = spawn.center();
 		this.player.teleport(world, center.getX(), center.getY(), center.getZ(), 0, 0);
 
 		this.player.sendMessage(new LiteralText("You are a ").append(this.role.getName()).append("."), true);

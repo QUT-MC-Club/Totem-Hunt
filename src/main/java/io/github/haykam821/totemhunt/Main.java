@@ -11,7 +11,7 @@ public class Main implements ModInitializer {
 	public static final String MOD_ID = "totemhunt";
 
 	private static final Identifier TOTEM_HUNT_ID = new Identifier(MOD_ID, "totemhunt");
-	public static final GameType<TotemHuntConfig> TOTEM_HUNT_TYPE = GameType.register(TOTEM_HUNT_ID, TotemHuntWaitingPhase::open, TotemHuntConfig.CODEC);
+	public static final GameType<TotemHuntConfig> TOTEM_HUNT_TYPE = GameType.register(TOTEM_HUNT_ID, TotemHuntConfig.CODEC, TotemHuntWaitingPhase::open);
 
 	@Override
 	public void onInitialize() {

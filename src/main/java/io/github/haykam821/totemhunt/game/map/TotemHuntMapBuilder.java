@@ -1,18 +1,19 @@
 package io.github.haykam821.totemhunt.game.map;
 
-import io.github.haykam821.totemhunt.game.TotemHuntConfig;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.BlockPos;
-import xyz.nucleoid.plasmid.game.GameOpenException;
-import xyz.nucleoid.plasmid.map.template.MapTemplate;
-import xyz.nucleoid.plasmid.map.template.MapTemplateMetadata;
-import xyz.nucleoid.plasmid.map.template.MapTemplateSerializer;
-import xyz.nucleoid.plasmid.map.template.TemplateRegion;
-import xyz.nucleoid.plasmid.util.BlockBounds;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import io.github.haykam821.totemhunt.game.TotemHuntConfig;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.BlockPos;
+import xyz.nucleoid.map_templates.BlockBounds;
+import xyz.nucleoid.map_templates.MapTemplate;
+import xyz.nucleoid.map_templates.MapTemplateMetadata;
+import xyz.nucleoid.map_templates.MapTemplateSerializer;
+import xyz.nucleoid.map_templates.TemplateRegion;
+import xyz.nucleoid.plasmid.game.GameOpenException;
 
 public class TotemHuntMapBuilder {
 	private final TotemHuntConfig config;
@@ -21,9 +22,9 @@ public class TotemHuntMapBuilder {
 		this.config = config;
 	}
 
-	public TotemHuntMap create() {
+	public TotemHuntMap create(MinecraftServer server) {
 		try {
-			MapTemplate template = MapTemplateSerializer.INSTANCE.loadFromResource(this.config.getMap());
+			MapTemplate template = MapTemplateSerializer.loadFromResource(server, this.config.getMap());
 
 			BlockBounds waitingSpawn = getWaitingSpawn(template.getMetadata());
 			List<BlockBounds> spawns = getSpawns(template.getMetadata(), waitingSpawn);
@@ -41,7 +42,7 @@ public class TotemHuntMapBuilder {
 		spawn = metadata.getFirstRegionBounds("spawn");
 		if (spawn != null) return spawn;
 
-		return BlockBounds.of(BlockPos.ORIGIN);
+		return BlockBounds.ofBlock(BlockPos.ORIGIN);
 	}
 
 	public static List<BlockBounds> getSpawns(MapTemplateMetadata metadata, BlockBounds waitingSpawn) {

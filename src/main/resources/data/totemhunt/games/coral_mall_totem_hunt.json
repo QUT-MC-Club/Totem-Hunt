@@ -1,6 +1,5 @@
 {
 	"type": "totemhunt:totemhunt",
-	"translation": "game.totemhunt.coral_mall_totem_hunt",
 	"map": "totemhunt:coral_mall",
 	"totems": 1,
 	"players": {
