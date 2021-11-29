@@ -17,9 +17,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
@@ -114,13 +114,14 @@ public class TotemHuntActivePhase {
 			index += 1;
 		}
 
-		MutableText breakdown = new LiteralText("The following roles are present:");
+		MutableText breakdown = new TranslatableText("text.totemhunt.role_breakdown.header");
 		for (Object2IntMap.Entry<Role> entry : roleCounts.object2IntEntrySet()) {
 			Role role = entry.getKey();
 			int count = entry.getIntValue();
 
 			if (count > 0) {
-				breakdown.append("\n- ").append(role.getName()).append(": " + count + " player" + (count == 1 ? "" : "s"));
+				Text entryText = new TranslatableText("text.totemhunt.role_breakdown.entry" + (count == 1 ? "" : ".plural"), role.getName(), count);
+				breakdown.append("\n").append(entryText);
 			}
 		}
 		this.gameSpace.getPlayers().sendMessage(breakdown.formatted(Formatting.GOLD));
@@ -137,11 +138,7 @@ public class TotemHuntActivePhase {
 
 		String time = TotemHuntActivePhase.FORMAT.format(this.ticksElapsed / (double) 20);
 
-		return hunterName.shallowCopy()
-				.append(" found the totem in the hands of ")
-				.append(holderName)
-				.append(" after " + time + " seconds!")
-				.formatted(Formatting.RED);
+		return new TranslatableText("text.totemhunt.totem_found", hunterName, holderName, time).formatted(Formatting.RED);
 	}
 
 	public void endGame(ServerPlayerEntity hunter, ServerPlayerEntity holder) {

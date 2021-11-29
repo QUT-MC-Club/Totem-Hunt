@@ -4,7 +4,7 @@ import io.github.haykam821.totemhunt.game.phase.TotemHuntActivePhase;
 import io.github.haykam821.totemhunt.game.role.Role;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import xyz.nucleoid.map_templates.BlockBounds;
@@ -39,7 +39,7 @@ public class PlayerEntry {
 		Vec3d center = spawn.center();
 		this.player.teleport(world, center.getX(), center.getY(), center.getZ(), 0, 0);
 
-		this.player.sendMessage(new LiteralText("You are a ").append(this.role.getName()).append("."), true);
+		this.player.sendMessage(new TranslatableText("text.totemhunt.role_spawn", this.role.getName()), true);
 	}
 
 	public void changeRole(Role role) {
@@ -47,7 +47,7 @@ public class PlayerEntry {
 		role.apply(this);
 
 		this.role = role;
-		this.player.sendMessage(new LiteralText("You are now a ").append(this.role.getName()).append("."), true);
+		this.player.sendMessage(new TranslatableText("text.totemhunt.role_change", this.role.getName()), true);
 	}
 
 	@Override

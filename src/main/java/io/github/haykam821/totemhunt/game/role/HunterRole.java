@@ -9,14 +9,13 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
 public class HunterRole extends Role {
-	private static final Text NAME = new LiteralText("Hunter").formatted(Formatting.RED);
+	private static final Text NAME = new TranslatableText("text.totemhunt.role.hunter").formatted(Formatting.RED);
 
 	private static final ItemStack SWORD = getUnbreakableStack(Items.IRON_SWORD);
 	private static final ItemStack HELMET = getUnbreakableBindingStack(Items.IRON_HELMET);

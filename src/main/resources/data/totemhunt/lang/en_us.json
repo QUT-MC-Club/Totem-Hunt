@@ -3,5 +3,15 @@
 	"game.totemhunt.lost_cavern_totem_hunt": "Lost Cavern Totem Hunt",
 	"gameType.totemhunt.totemhunt": "Totem Hunt",
 	"text.totemhunt.bar.invulnerability": "Run from the Hunter",
-	"text.totemhunt.cannot_attack_invulnerable_player": "You cannot attack a Totem Holder during the invulnerability period."
+	"text.totemhunt.cannot_attack_invulnerable_player": "You cannot attack a Totem Holder during the invulnerability period.",
+	"text.totemhunt.role.holder": "Totem Holder",
+	"text.totemhunt.role.hunter": "Hunter",
+	"text.totemhunt.role.player": "Player",
+	"text.totemhunt.role_breakdown.entry": "- %s: %s player",
+	"text.totemhunt.role_breakdown.entry.plural": "- %s: %s players",
+	"text.totemhunt.role_breakdown.header": "The following roles are present:",
+	"text.totemhunt.role_change": "You are now a %s.",
+	"text.totemhunt.role_spawn": "You are a %s.",
+	"text.totemhunt.template_load_failed": "Failed to load template",
+	"text.totemhunt.totem_found": "%s found the totem in the hands of %s after %s seconds!"
 }
