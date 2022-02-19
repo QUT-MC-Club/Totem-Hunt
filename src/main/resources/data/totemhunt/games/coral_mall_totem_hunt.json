@@ -1,5 +1,6 @@
 {
 	"type": "totemhunt:totemhunt",
+	"icon": "minecraft:bubble_coral",
 	"map": "totemhunt:coral_mall",
 	"totems": 1,
 	"players": {

@@ -1,5 +1,6 @@
 {
 	"type": "totemhunt:totemhunt",
+	"icon": "minecraft:polished_blackstone_bricks",
 	"map": "totemhunt:lost_cavern",
 	"totems": 1,
 	"players": {
