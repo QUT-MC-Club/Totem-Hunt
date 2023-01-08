@@ -19,7 +19,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
@@ -114,13 +113,13 @@ public class TotemHuntActivePhase {
 			index += 1;
 		}
 
-		MutableText breakdown = new TranslatableText("text.totemhunt.role_breakdown.header");
+		MutableText breakdown = Text.translatable("text.totemhunt.role_breakdown.header");
 		for (Object2IntMap.Entry<Role> entry : roleCounts.object2IntEntrySet()) {
 			Role role = entry.getKey();
 			int count = entry.getIntValue();
 
 			if (count > 0) {
-				Text entryText = new TranslatableText("text.totemhunt.role_breakdown.entry" + (count == 1 ? "" : ".plural"), role.getName(), count);
+				Text entryText = Text.translatable("text.totemhunt.role_breakdown.entry" + (count == 1 ? "" : ".plural"), role.getName(), count);
 				breakdown.append("\n").append(entryText);
 			}
 		}
@@ -138,7 +137,7 @@ public class TotemHuntActivePhase {
 
 		String time = TotemHuntActivePhase.FORMAT.format(this.ticksElapsed / (double) 20);
 
-		return new TranslatableText("text.totemhunt.totem_found", hunterName, holderName, time).formatted(Formatting.RED);
+		return Text.translatable("text.totemhunt.totem_found", hunterName, holderName, time).formatted(Formatting.RED);
 	}
 
 	public void endGame(ServerPlayerEntity hunter, ServerPlayerEntity holder) {

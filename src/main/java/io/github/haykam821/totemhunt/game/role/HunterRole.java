@@ -10,12 +10,11 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
 public class HunterRole extends Role {
-	private static final Text NAME = new TranslatableText("text.totemhunt.role.hunter").formatted(Formatting.RED);
+	private static final Text NAME = Text.translatable("text.totemhunt.role.hunter").formatted(Formatting.RED);
 
 	private static final ItemStack SWORD = getUnbreakableStack(Items.IRON_SWORD);
 	private static final ItemStack HELMET = getUnbreakableBindingStack(Items.IRON_HELMET);
@@ -31,7 +30,7 @@ public class HunterRole extends Role {
 	@Override
 	public void onGiveTotem(TotemHuntActivePhase phase, PlayerEntry from, PlayerEntry to) {
 		if (phase.isInvulnerabilityPeriod()) {
-			Text message = new TranslatableText("text.totemhunt.cannot_attack_invulnerable_player").formatted(Formatting.RED);
+			Text message = Text.translatable("text.totemhunt.cannot_attack_invulnerable_player").formatted(Formatting.RED);
 			from.getPlayer().sendMessage(message, false);
 
 			return;

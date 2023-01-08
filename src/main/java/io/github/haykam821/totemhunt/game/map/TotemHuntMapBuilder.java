@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import io.github.haykam821.totemhunt.game.TotemHuntConfig;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import xyz.nucleoid.map_templates.BlockBounds;
 import xyz.nucleoid.map_templates.MapTemplate;
@@ -31,7 +31,7 @@ public class TotemHuntMapBuilder {
 
 			return new TotemHuntMap(template, waitingSpawn, spawns);
 		} catch (IOException e) {
-			throw new GameOpenException(new TranslatableText("text.totemhunt.template_load_failed"), e);
+			throw new GameOpenException(Text.translatable("text.totemhunt.template_load_failed"), e);
 		}
 	}
 
