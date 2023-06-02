@@ -15,6 +15,7 @@ import io.github.haykam821.totemhunt.game.role.Roles;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
@@ -120,7 +121,7 @@ public class TotemHuntActivePhase {
 
 			if (count > 0) {
 				Text entryText = Text.translatable("text.totemhunt.role_breakdown.entry" + (count == 1 ? "" : ".plural"), role.getName(), count);
-				breakdown.append("\n").append(entryText);
+				breakdown.append(ScreenTexts.LINE_BREAK).append(entryText);
 			}
 		}
 		this.gameSpace.getPlayers().sendMessage(breakdown.formatted(Formatting.GOLD));
