@@ -45,6 +45,7 @@ public class TotemHuntActivePhase {
 	private final List<PlayerEntry> players = new ArrayList<>();
 	private final TotemHuntBar timer;
 	private int ticksElapsed = 0;
+	private int ticksUntilClose = -1;
 
 	public TotemHuntActivePhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config, GlobalWidgets widgets) {
 		this.gameSpace = gameSpace;
@@ -128,6 +129,16 @@ public class TotemHuntActivePhase {
 	}
 
 	private void tick() {
+		// Decrease ticks until game end to zero
+		if (this.isGameEnding()) {
+			if (this.ticksUntilClose == 0) {
+				this.gameSpace.close(GameCloseReason.FINISHED);
+			}
+
+			this.ticksUntilClose -= 1;
+			return;
+		}
+
 		this.ticksElapsed += 1;
 		this.timer.tick();
 	}
@@ -143,7 +154,11 @@ public class TotemHuntActivePhase {
 
 	public void endGame(ServerPlayerEntity hunter, ServerPlayerEntity holder) {
 		this.gameSpace.getPlayers().sendMessage(this.getWinMessage(hunter, holder));
-		this.gameSpace.close(GameCloseReason.FINISHED);
+		this.ticksUntilClose = this.config.getTicksUntilClose().get(this.world.getRandom());
+	}
+
+	private boolean isGameEnding() {
+		return this.ticksUntilClose >= 0;
 	}
 
 	private void setSpectator(ServerPlayerEntity player) {
@@ -166,6 +181,8 @@ public class TotemHuntActivePhase {
 	}
 
 	private void removePlayer(ServerPlayerEntity player) {
+		if (this.isGameEnding()) return;
+
 		PlayerEntry entry = this.getEntryFromPlayer(player);
 		if (entry != null) {
 			this.players.remove(entry);
@@ -200,6 +217,7 @@ public class TotemHuntActivePhase {
 	}
 	
 	private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float damage) {
+		if (this.isGameEnding()) return ActionResult.FAIL;
 		if (!(source.getAttacker() instanceof ServerPlayerEntity)) return ActionResult.FAIL;
 
 		PlayerEntry target = this.getEntryFromPlayer(player);
