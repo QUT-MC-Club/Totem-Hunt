@@ -1,6 +1,6 @@
 {
-	"game.totemhunt.coral_mall_totem_hunt": "Coral Mall Totem Hunt",
-	"game.totemhunt.lost_cavern_totem_hunt": "Lost Cavern Totem Hunt",
+	"game.totemhunt.coral_mall_totem_hunt": "Totem Hunt: Coral Mall",
+	"game.totemhunt.lost_cavern_totem_hunt": "Totem Hunt: Lost Cavern",
 	"gameType.totemhunt.totemhunt": "Totem Hunt",
 	"text.totemhunt.bar.invulnerability": "Run from the Hunter",
 	"text.totemhunt.cannot_attack_invulnerable_player": "You cannot attack a Totem Holder during the invulnerability period.",
