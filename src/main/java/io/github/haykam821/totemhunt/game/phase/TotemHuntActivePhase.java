@@ -28,6 +28,7 @@ import xyz.nucleoid.plasmid.game.GameActivity;
 import xyz.nucleoid.plasmid.game.GameCloseReason;
 import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.common.team.TeamManager;
 import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
 import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
 import xyz.nucleoid.plasmid.game.player.PlayerOffer;
@@ -45,15 +46,17 @@ public class TotemHuntActivePhase {
 	private final TotemHuntConfig config;
 	private final List<PlayerEntry> players = new ArrayList<>();
 	private final TotemHuntBar timer;
+	private final TeamManager teamManager;
 	private int ticksElapsed = 0;
 	private int ticksUntilClose = -1;
 
-	public TotemHuntActivePhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config, GlobalWidgets widgets) {
+	public TotemHuntActivePhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config, GlobalWidgets widgets, TeamManager teamManager) {
 		this.gameSpace = gameSpace;
 		this.world = world;
 		this.map = map;
 		this.config = config;
 		this.timer = new TotemHuntBar(this, widgets);
+		this.teamManager = teamManager;
 	}
 
 	public static void setRules(GameActivity activity) {
@@ -68,7 +71,13 @@ public class TotemHuntActivePhase {
 	public static void open(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config) {
 		gameSpace.setActivity(activity -> {
 			GlobalWidgets widgets = GlobalWidgets.addTo(activity);
-			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, world, map, config, widgets);
+			TeamManager teamManager = TeamManager.addTo(activity);
+
+			for (Role role : Role.REGISTRY.values()) {
+				role.registerTeam(teamManager);
+			}
+
+			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, world, map, config, widgets, teamManager);
 
 			TotemHuntActivePhase.setRules(activity);
 
@@ -252,6 +261,10 @@ public class TotemHuntActivePhase {
 
 	public TotemHuntConfig getConfig() {
 		return this.config;
+	}
+
+	public TeamManager getTeamManager() {
+		return this.teamManager;
 	}
 
 	public int getTicksElapsed() {

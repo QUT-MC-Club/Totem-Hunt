@@ -10,6 +10,7 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
@@ -25,6 +26,16 @@ public class HunterRole extends Role {
 	@Override
 	public Text getName() {
 		return NAME;
+	}
+
+	@Override
+	public boolean hasTeam() {
+		return true;
+	}
+
+	@Override
+	public DyeColor getColor() {
+		return DyeColor.RED;
 	}
 
 	@Override
