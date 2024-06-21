@@ -42,12 +42,15 @@ public class PlayerEntry {
 		this.player.sendMessage(Text.translatable("text.totemhunt.role_spawn", this.role.getName()), true);
 	}
 
-	public void changeRole(Role role) {
+	public void changeRole(Role role, boolean notify) {
 		this.role.unapply(this);
 		role.apply(this);
 
 		this.role = role;
-		this.player.sendMessage(Text.translatable("text.totemhunt.role_change", this.role.getName()), true);
+
+		if (notify) {
+			this.player.sendMessage(Text.translatable("text.totemhunt.role_change", this.role.getName()), true);
+		}
 	}
 
 	@Override

@@ -16,8 +16,8 @@ public abstract class Role {
 	public abstract Text getName();
 
 	public void onGiveTotem(TotemHuntActivePhase phase, PlayerEntry from, PlayerEntry to) {
-		from.changeRole(Roles.PLAYER.getRole());
-		to.changeRole(Roles.HOLDER.getRole());
+		from.changeRole(Roles.PLAYER.getRole(), true);
+		to.changeRole(Roles.HOLDER.getRole(), true);
 	}
 
 	public boolean canTransferTo(Role role) {

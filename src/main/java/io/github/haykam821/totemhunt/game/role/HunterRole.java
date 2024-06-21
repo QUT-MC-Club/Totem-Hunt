@@ -36,7 +36,7 @@ public class HunterRole extends Role {
 			return;
 		}
 
-		from.getPhase().endGame(from.getPlayer(), to.getPlayer());
+		from.getPhase().endGame(from, to);
 	}
 
 	@Override

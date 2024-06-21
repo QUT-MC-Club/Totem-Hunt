@@ -14,6 +14,7 @@ import io.github.haykam821.totemhunt.game.role.Role;
 import io.github.haykam821.totemhunt.game.role.Roles;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -152,8 +153,12 @@ public class TotemHuntActivePhase {
 		return Text.translatable("text.totemhunt.totem_found", hunterName, holderName, time).formatted(Formatting.RED);
 	}
 
-	public void endGame(ServerPlayerEntity hunter, ServerPlayerEntity holder) {
-		this.gameSpace.getPlayers().sendMessage(this.getWinMessage(hunter, holder));
+	public void endGame(PlayerEntry hunter, PlayerEntry holder) {
+		holder.changeRole(Roles.PLAYER.getRole(), false);
+
+		this.gameSpace.getPlayers().sendMessage(this.getWinMessage(hunter.getPlayer(), holder.getPlayer()));
+		this.world.sendEntityStatus(holder.getPlayer(), EntityStatuses.USE_TOTEM_OF_UNDYING);
+
 		this.ticksUntilClose = this.config.getTicksUntilClose().get(this.world.getRandom());
 	}
 
@@ -208,10 +213,10 @@ public class TotemHuntActivePhase {
 		for (PlayerEntry entry : this.players) {
 			if (needsHunter) {
 				needsHunter = false;
-				entry.changeRole(Roles.HUNTER.getRole());
+				entry.changeRole(Roles.HUNTER.getRole(), true);
 			} else if (needsHolder) {
 				needsHolder = false;
-				entry.changeRole(Roles.HUNTER.getRole());
+				entry.changeRole(Roles.HUNTER.getRole(), true);
 			}
 		}
 	}
