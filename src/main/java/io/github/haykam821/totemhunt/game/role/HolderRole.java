@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class HolderRole extends Role {
-	private static final Text NAME = Text.translatable("text.totemhunt.role.holder").formatted(Formatting.GOLD);
+	private static final Text NAME = Text.translatable("text.totemhunt.role.holder").formatted(Formatting.YELLOW);
 	private static final ItemStack TOTEM = new ItemStack(Items.TOTEM_OF_UNDYING);
 
 	@Override
