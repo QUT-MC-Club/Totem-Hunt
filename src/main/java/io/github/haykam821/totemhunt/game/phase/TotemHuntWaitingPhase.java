@@ -1,6 +1,10 @@
 package io.github.haykam821.totemhunt.game.phase;
 
+import eu.pb4.polymer.virtualentity.api.ElementHolder;
+import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import io.github.haykam821.totemhunt.game.TotemHuntConfig;
+import io.github.haykam821.totemhunt.game.map.GuideText;
 import io.github.haykam821.totemhunt.game.map.TotemHuntMap;
 import io.github.haykam821.totemhunt.game.map.TotemHuntMapBuilder;
 import net.minecraft.entity.damage.DamageSource;
@@ -28,6 +32,8 @@ public class TotemHuntWaitingPhase {
 	private final TotemHuntMap map;
 	private final TotemHuntConfig config;
 
+	private HolderAttachment guideText;
+
 	public TotemHuntWaitingPhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config) {
 		this.gameSpace = gameSpace;
 		this.world = world;
@@ -50,6 +56,7 @@ public class TotemHuntWaitingPhase {
 			TotemHuntActivePhase.setRules(activity);
 
 			// Listeners
+			activity.listen(GameActivityEvents.ENABLE, phase::enable);
 			activity.listen(GamePlayerEvents.OFFER, phase::offerPlayer);
 			activity.listen(PlayerDamageEvent.EVENT, phase::onPlayerDamage);
 			activity.listen(PlayerDeathEvent.EVENT, phase::onPlayerDeath);
@@ -57,8 +64,18 @@ public class TotemHuntWaitingPhase {
 		});
 	}
 
+	private void enable() {
+		// Spawn guide text
+		Vec3d guideTextPos = this.map.getGuideTextPos();
+
+		if (guideTextPos != null) {
+			ElementHolder holder = GuideText.createElementHolder();
+			this.guideText = ChunkAttachment.of(holder, world, guideTextPos);
+		}
+	}
+
 	public GameResult requestStart() {
-		TotemHuntActivePhase.open(this.gameSpace, this.world, this.map, this.config);
+		TotemHuntActivePhase.open(this.gameSpace, this.world, this.map, this.config, this.guideText);
 		return GameResult.ok();
 	}
 

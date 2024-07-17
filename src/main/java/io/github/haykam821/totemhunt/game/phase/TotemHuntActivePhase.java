@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import io.github.haykam821.totemhunt.game.PlayerEntry;
 import io.github.haykam821.totemhunt.game.TotemHuntBar;
 import io.github.haykam821.totemhunt.game.TotemHuntConfig;
@@ -47,14 +48,16 @@ public class TotemHuntActivePhase {
 	private final List<PlayerEntry> players = new ArrayList<>();
 	private final TotemHuntBar timer;
 	private final TeamManager teamManager;
+	private HolderAttachment guideText;
 	private int ticksElapsed = 0;
 	private int ticksUntilClose = -1;
 
-	public TotemHuntActivePhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config, GlobalWidgets widgets, TeamManager teamManager) {
+	public TotemHuntActivePhase(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config, HolderAttachment guideText, GlobalWidgets widgets, TeamManager teamManager) {
 		this.gameSpace = gameSpace;
 		this.world = world;
 		this.map = map;
 		this.config = config;
+		this.guideText = guideText;
 		this.timer = new TotemHuntBar(this, widgets);
 		this.teamManager = teamManager;
 	}
@@ -68,7 +71,7 @@ public class TotemHuntActivePhase {
 		activity.deny(GameRuleType.THROW_ITEMS);
 	}
 
-	public static void open(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config) {
+	public static void open(GameSpace gameSpace, ServerWorld world, TotemHuntMap map, TotemHuntConfig config, HolderAttachment guideText) {
 		gameSpace.setActivity(activity -> {
 			GlobalWidgets widgets = GlobalWidgets.addTo(activity);
 			TeamManager teamManager = TeamManager.addTo(activity);
@@ -77,7 +80,7 @@ public class TotemHuntActivePhase {
 				role.registerTeam(teamManager);
 			}
 
-			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, world, map, config, widgets, teamManager);
+			TotemHuntActivePhase phase = new TotemHuntActivePhase(gameSpace, world, map, config, guideText, widgets, teamManager);
 
 			TotemHuntActivePhase.setRules(activity);
 
@@ -139,6 +142,15 @@ public class TotemHuntActivePhase {
 	}
 
 	private void tick() {
+		this.ticksElapsed += 1;
+
+		if (this.guideText != null) {
+			if (this.ticksElapsed == this.config.getGuideTicks()) {
+				this.guideText.destroy();
+				this.guideText = null;
+			}
+		}
+
 		// Decrease ticks until game end to zero
 		if (this.isGameEnding()) {
 			if (this.ticksUntilClose == 0) {
@@ -149,7 +161,6 @@ public class TotemHuntActivePhase {
 			return;
 		}
 
-		this.ticksElapsed += 1;
 		this.timer.tick();
 	}
 

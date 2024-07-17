@@ -28,8 +28,9 @@ public class TotemHuntMapBuilder {
 
 			BlockBounds waitingSpawn = getWaitingSpawn(template.getMetadata());
 			List<BlockBounds> spawns = getSpawns(template.getMetadata(), waitingSpawn);
+			BlockBounds guideTextPos = template.getMetadata().getFirstRegionBounds("guide_text");
 
-			return new TotemHuntMap(template, waitingSpawn, spawns);
+			return new TotemHuntMap(template, waitingSpawn, spawns, guideTextPos);
 		} catch (IOException e) {
 			throw new GameOpenException(Text.translatable("text.totemhunt.template_load_failed"), e);
 		}
