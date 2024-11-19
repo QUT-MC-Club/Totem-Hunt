@@ -1,5 +1,7 @@
 package io.github.haykam821.totemhunt.game;
 
+import java.util.Set;
+
 import io.github.haykam821.totemhunt.game.phase.TotemHuntActivePhase;
 import io.github.haykam821.totemhunt.game.role.Role;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -7,7 +9,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.map_templates.BlockBounds;
 
 public class PlayerEntry {
 	private final TotemHuntActivePhase phase;
@@ -32,12 +33,11 @@ public class PlayerEntry {
 		return this.role;
 	}
 
-	public void spawn(ServerWorld world, BlockBounds spawn) {
+	public void spawn(ServerWorld world, Vec3d spawn) {
 		this.player.changeGameMode(GameMode.ADVENTURE);
 		this.role.apply(this);
 
-		Vec3d center = spawn.center();
-		this.player.teleport(world, center.getX(), center.getY(), center.getZ(), 0, 0);
+		this.player.teleport(world, spawn.getX(), spawn.getY(), spawn.getZ(), Set.of(), 0, 0, true);
 
 		this.player.sendMessage(Text.translatable("text.totemhunt.role_spawn", this.role.getName()), true);
 	}

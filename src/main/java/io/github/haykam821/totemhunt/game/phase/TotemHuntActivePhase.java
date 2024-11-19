@@ -22,19 +22,20 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.plasmid.game.GameActivity;
-import xyz.nucleoid.plasmid.game.GameCloseReason;
-import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
-import xyz.nucleoid.plasmid.game.common.team.TeamManager;
-import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
-import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
-import xyz.nucleoid.plasmid.game.player.PlayerOffer;
-import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
-import xyz.nucleoid.plasmid.game.rule.GameRuleType;
+import xyz.nucleoid.plasmid.api.game.GameActivity;
+import xyz.nucleoid.plasmid.api.game.GameCloseReason;
+import xyz.nucleoid.plasmid.api.game.GameSpace;
+import xyz.nucleoid.plasmid.api.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.api.game.common.team.TeamManager;
+import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.api.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.api.game.player.JoinAcceptor;
+import xyz.nucleoid.plasmid.api.game.player.JoinAcceptorResult;
+import xyz.nucleoid.plasmid.api.game.player.JoinOffer;
+import xyz.nucleoid.plasmid.api.game.rule.GameRuleType;
+import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
 import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
@@ -87,7 +88,8 @@ public class TotemHuntActivePhase {
 			// Listeners
 			activity.listen(GameActivityEvents.ENABLE, phase::enable);
 			activity.listen(GameActivityEvents.TICK, phase::tick);
-			activity.listen(GamePlayerEvents.OFFER, phase::offerPlayer);
+			activity.listen(GamePlayerEvents.ACCEPT, phase::onAcceptPlayers);
+			activity.listen(GamePlayerEvents.OFFER, JoinOffer::acceptSpectators);
 			activity.listen(GamePlayerEvents.REMOVE, phase::removePlayer);
 			activity.listen(PlayerDamageEvent.EVENT, phase::onPlayerDamage);
 			activity.listen(PlayerDeathEvent.EVENT, phase::onPlayerDeath);
@@ -104,7 +106,7 @@ public class TotemHuntActivePhase {
 
 	private List<ServerPlayerEntity> getShuffledPlayers() {
 		List<ServerPlayerEntity> players = new ArrayList<>();
-		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
+		for (ServerPlayerEntity player : this.gameSpace.getPlayers().participants()) {
 			players.add(player);
 		}
 
@@ -122,10 +124,15 @@ public class TotemHuntActivePhase {
 			roleCounts.addTo(role, 1);
 
 			PlayerEntry entry = new PlayerEntry(this, player, role);
-			entry.spawn(world, this.map.getSpawns().get(index % this.map.getSpawns().size()));
+			entry.spawn(world, this.map.getSpawn(index));
 
 			this.players.add(entry);
 			index += 1;
+		}
+
+		for (ServerPlayerEntity player : this.gameSpace.getPlayers().spectators()) {
+			this.map.teleportToWaitingSpawn(player, this.world);
+			this.setSpectator(player);
 		}
 
 		MutableText breakdown = Text.translatable("text.totemhunt.role_breakdown.header");
@@ -199,9 +206,9 @@ public class TotemHuntActivePhase {
 		return null;
 	}
 
-	private PlayerOfferResult offerPlayer(PlayerOffer offer) {
-		return offer.accept(this.world, this.map.getWaitingSpawn().center()).and(() -> {
-			this.setSpectator(offer.player());
+	private JoinAcceptorResult onAcceptPlayers(JoinAcceptor acceptor) {
+		return acceptor.teleport(this.world, this.map.getWaitingSpawn()).thenRunForEach(player -> {
+			this.setSpectator(player);
 		});
 	}
 
@@ -241,29 +248,29 @@ public class TotemHuntActivePhase {
 		}
 	}
 	
-	private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float damage) {
-		if (this.isGameEnding()) return ActionResult.FAIL;
-		if (!(source.getAttacker() instanceof ServerPlayerEntity)) return ActionResult.FAIL;
+	private EventResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float damage) {
+		if (this.isGameEnding()) return EventResult.DENY;
+		if (!(source.getAttacker() instanceof ServerPlayerEntity)) return EventResult.DENY;
 
 		PlayerEntry target = this.getEntryFromPlayer(player);
-		if (target == null) return ActionResult.FAIL;
+		if (target == null) return EventResult.DENY;
 
 		PlayerEntry attacker = this.getEntryFromPlayer((ServerPlayerEntity) source.getAttacker());
-		if (attacker == null) return ActionResult.FAIL;
+		if (attacker == null) return EventResult.DENY;
 	
 		if (attacker.getRole().canTransferTo(target.getRole())) {
 			attacker.getRole().onGiveTotem(this, attacker, target);
 		}
-		return ActionResult.FAIL;
+		return EventResult.DENY;
 	}
 
-	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+	private EventResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		PlayerEntry entry = this.getEntryFromPlayer(player);
 		if (entry != null) {
 			entry.spawn(this.world, this.map.getWaitingSpawn());
 		}
 
-		return ActionResult.FAIL;
+		return EventResult.DENY;
 	}
 
 	public GameSpace getGameSpace() {

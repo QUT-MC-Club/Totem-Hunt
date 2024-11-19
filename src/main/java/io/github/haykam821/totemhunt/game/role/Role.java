@@ -6,14 +6,15 @@ import java.util.List;
 import io.github.haykam821.totemhunt.game.PlayerEntry;
 import io.github.haykam821.totemhunt.game.phase.TotemHuntActivePhase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
-import xyz.nucleoid.plasmid.game.common.team.GameTeamConfig;
-import xyz.nucleoid.plasmid.game.common.team.GameTeamKey;
-import xyz.nucleoid.plasmid.game.common.team.TeamManager;
-import xyz.nucleoid.plasmid.registry.TinyRegistry;
+import xyz.nucleoid.plasmid.api.game.common.team.GameTeamConfig;
+import xyz.nucleoid.plasmid.api.game.common.team.GameTeamKey;
+import xyz.nucleoid.plasmid.api.game.common.team.TeamManager;
+import xyz.nucleoid.plasmid.api.util.TinyRegistry;
 
 public abstract class Role {
 	public static final TinyRegistry<Role> REGISTRY = TinyRegistry.create();
@@ -82,7 +83,7 @@ public abstract class Role {
 		}
 
 		slot = 3;
-		List<ItemStack> armor = this.getArmor();
+		List<ItemStack> armor = this.getArmor(player.getRegistryManager());
 		for (ItemStack stack : armor) {
 			player.getInventory().armor.set(slot, stack);
 			slot -= 1;
@@ -102,7 +103,7 @@ public abstract class Role {
 		return new ArrayList<>();
 	}
 
-	public List<ItemStack> getArmor() {
+	public List<ItemStack> getArmor(RegistryWrapper.WrapperLookup registries) {
 		return new ArrayList<>();
 	}
 }

@@ -9,19 +9,17 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
-import xyz.nucleoid.plasmid.util.ItemStackBuilder;
+import xyz.nucleoid.plasmid.api.util.ItemStackBuilder;
 
 public class HunterRole extends Role {
 	private static final Text NAME = Text.translatable("text.totemhunt.role.hunter").formatted(Formatting.RED);
 
-	private static final ItemStack SWORD = getUnbreakableStack(Items.IRON_SWORD);
-	private static final ItemStack HELMET = getUnbreakableBindingStack(Items.IRON_HELMET);
-	private static final ItemStack CHESTPLATE = getUnbreakableBindingStack(Items.IRON_CHESTPLATE);
-	private static final ItemStack LEGGINGS = getUnbreakableBindingStack(Items.IRON_LEGGINGS);
-	private static final ItemStack BOOTS = getUnbreakableBindingStack(Items.IRON_BOOTS);
+	private static final ItemStack SWORD = createUnbreakableStack(Items.IRON_SWORD);
 
 	@Override
 	public Text getName() {
@@ -61,19 +59,24 @@ public class HunterRole extends Role {
 	}
 
 	@Override
-	public List<ItemStack> getArmor() {
-		return Arrays.asList(HELMET.copy(), CHESTPLATE.copy(), LEGGINGS.copy(), BOOTS.copy());
+	public List<ItemStack> getArmor(RegistryWrapper.WrapperLookup registries) {
+		ItemStack helmet = createUnbreakableBindingStack(Items.IRON_HELMET, registries);
+		ItemStack chestplate = createUnbreakableBindingStack(Items.IRON_CHESTPLATE, registries);
+		ItemStack leggings = createUnbreakableBindingStack(Items.IRON_LEGGINGS, registries);
+		ItemStack boots = createUnbreakableBindingStack(Items.IRON_BOOTS, registries);
+
+		return Arrays.asList(helmet, chestplate, leggings, boots);
 	}
 
-	private static ItemStack getUnbreakableStack(ItemConvertible item) {
+	private static ItemStack createUnbreakableStack(ItemConvertible item) {
 		return ItemStackBuilder.of(item)
 			.setUnbreakable()
 			.build();
 	}
 
-	private static ItemStack getUnbreakableBindingStack(ItemConvertible item) {
-		ItemStack stack = getUnbreakableStack(item);
-		stack.addEnchantment(Enchantments.BINDING_CURSE, 1);
+	private static ItemStack createUnbreakableBindingStack(ItemConvertible item, RegistryWrapper.WrapperLookup registries) {
+		ItemStack stack = createUnbreakableStack(item);
+		stack.addEnchantment(registries.getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(Enchantments.BINDING_CURSE), 1);
 		return stack;
 	}
 }
